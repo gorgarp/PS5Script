@@ -1,0 +1,88 @@
+/* Target PS5 preorders are heavily botted. It's fair to use this to get yourself a PS5.
+ 
+SCALPERS FUCK OFF
+ 
+  --- Method to get PS5 preorder from Target ---
+ 
+1. Add cheap item to cart. I used a candy bar
+2. Go to https://www.target.com/co-review
+3. Click add payment or edit payment and apply CVV code to card
+4. Run script in devtools console and wait for it to attempt a buy
+ 
+(reload page and redo CVV every 2000 failed attempts or so)
+ 
+Results
+- Common: An error that item in cart is out of stock
+- Rare: Get a PS5 :)
+- Rare: You buy the candy bar.
+ 
+I got mine after a few hours. Let me know if this gets you one. Fox#0001 ^.^
+ 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ 
+Credit to @pixxlated for 99% of this script. */
+ 
+(()=> {
+var clicked = false;
+var node = document.createElement('div');
+node.id='boomer1';
+node.style.backgroundColor='red';
+node.style.position='fixed';
+node.style.top='0px';
+node.style.height='300px';
+node.style.width='300px';
+node.style.display='flex';
+node.style.alignItems='center';
+ 
+var text = document.createElement('div');
+text.id='boomer2';
+text.innerText='Setting up...';
+text.style.fontSize='24px';
+text.style.color='#fff';
+ 
+node.appendChild(text);
+document.body.appendChild(node);
+ 
+window.refreshSeconds = 0.5;
+window.boomerAttempts = 0;
+ 
+function attemptAdd(textNode, upc) {
+   if (clicked) return;
+   var cartUrl = 'https://carts.target.com/web_checkouts/v1/cart_items?field_groups=CART%2CCART_ITEMS%2CSUMMARY&key=feaf228eb2777fd3eee0fd5192ae7107d6224b39';
+   var cart = {"cart_type":"REGULAR","channel_id":"10","shopping_context":"DIGITAL","cart_item":{"tcin":upc,"quantity":1,"item_channel_id":"10"},"fulfillment":{"fulfillment_test_mode":"grocery_opu_team_member_test"}};
+   
+   textNode.innerText = 'Attempting...';
+ 
+   fetch(cartUrl, { method: 'POST', mode: 'cors', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cart) })
+   .then(response => {
+     if (response.status == 200 || response.status == 201) {
+       return response;
+     } else {
+       window.boomerAttempts++;
+       textNode.innerText = 'Failed... Attempt #' + window.boomerAttempts;
+       return false;
+     }
+   }).then(response => {
+     if (!response) return;
+     document.querySelectorAll('button[data-test="placeOrderButton"]')[0].click();
+     console.log('CLICKED!');
+     clicked = true;
+   });
+}
+ 
+setInterval(() => {
+  var PS5_UPC = '81114595';
+  attemptAdd(text, PS5_UPC);
+}, window.refreshSeconds * 1000);
+ 
+})()
